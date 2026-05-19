@@ -25,9 +25,13 @@
 
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Functions')" class="grid">
-                <flux:sidebar.item icon="home" :href="route('watchables.create')" :current="request()->routeIs('watchables.create')"
+                <flux:sidebar.item icon="plus" :href="route('movies.create')" :current="request()->routeIs('movies.create')"
                     wire:navigate>
-                    {{ __('New') }}
+                    {{ __('New Movie') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="plus" :href="route('series.create')" :current="request()->routeIs('series.create')"
+                    wire:navigate>
+                    {{ __('New Series') }}
                 </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>

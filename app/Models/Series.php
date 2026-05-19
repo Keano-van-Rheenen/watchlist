@@ -3,23 +3,29 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Watchable extends Model
+class Series extends Model
 {
     use HasUuids;
-
-    protected $table = 'watchable';
-
-    public $incrementing = false;
 
     protected $keyType = 'string';
 
     protected $fillable = [
         'user_id',
+        'hierarchy_index',
         'title',
         'summary',
-        'duration',
+        'episodes',
         'picture',
     ];
+
+    protected $casts = [
+        'hierarchy_index' => 'integer',
+        'episodes' => 'integer',
+    ];
+
+    use HasFactory;
+
 }

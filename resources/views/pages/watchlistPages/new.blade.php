@@ -2,7 +2,7 @@
 	@vite(['resources/css/app.css', 'resources/js/app.js'])
 
 	<div class="mx-auto w-full max-w-2xl p-6">
-		<h1 class="mb-6 text-2xl font-semibold">Create Watchable</h1>
+		<h1 class="mb-6 text-2xl font-semibold">Create Movie / Series</h1>
 
 		@if ($errors->any())
 			<div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-red-700">
@@ -18,6 +18,14 @@
 			@csrf
 
 			<div>
+				<label class="mb-1 block text-sm font-medium">Type</label>
+				<div class="flex gap-4 items-center">
+				<label><input type="radio" name="type" value="movie" {{ old('type', 'movie') === 'movie' ? 'checked' : '' }}> Movie</label>
+				<label><input type="radio" name="type" value="series" {{ old('type') === 'series' ? 'checked' : '' }}> Series</label>
+				</div>
+			</div>
+
+			<div>
 				<label for="title" class="mb-1 block text-sm font-medium">Title</label>
 				<input id="title" name="title" type="text" value="{{ old('title') }}" required
 					class="w-full rounded border border-zinc-300 p-2 text-zinc-900" />
@@ -29,15 +37,21 @@
 					class="w-full rounded border border-zinc-300 p-2 text-zinc-900">{{ old('summary') }}</textarea>
 			</div>
 
-			<div>
-				<label for="duration" class="mb-1 block text-sm font-medium">Duration</label>
+			<div id="duration-wrap">
+				<label for="duration" class="mb-1 block text-sm font-medium">Duration (HH:MM)</label>
 				<input id="duration" name="duration" type="text" value="{{ old('duration') }}" placeholder="01:30"
-					required class="w-full rounded border border-zinc-300 p-2 text-zinc-900" />
+					class="w-full rounded border border-zinc-300 p-2 text-zinc-900" />
+			</div>
+
+			<div id="episodes-wrap" style="display: none;">
+				<label for="episodes" class="mb-1 block text-sm font-medium">Episodes</label>
+				<input id="episodes" name="episodes" type="number" value="{{ old('episodes') }}" min="1"
+					class="w-full rounded border border-zinc-300 p-2 text-zinc-900" />
 			</div>
 
 			<div>
 				<label for="picture" class="mb-1 block text-sm font-medium">Picture</label>
-				<input id="picture" name="picture" type="file" accept="image/*" required
+				<input id="picture" name="picture" type="file" accept="image/*"
 					class="block w-full text-sm" />
 			</div>
 
@@ -47,4 +61,28 @@
 			</div>
 		</form>
 	</div>
+
+	<script>
+		function syncType() {
+			const type = document.querySelector('input[name="type"]:checked').value;
+			const durationWrap = document.getElementById('duration-wrap');
+			const episodesWrap = document.getElementById('episodes-wrap');
+
+			if (type === 'movie') {
+				durationWrap.style.display = '';
+				episodesWrap.style.display = 'none';
+				document.getElementById('duration').required = true;
+				document.getElementById('episodes').required = false;
+			} else {
+				durationWrap.style.display = 'none';
+				episodesWrap.style.display = '';
+				document.getElementById('duration').required = false;
+				document.getElementById('episodes').required = true;
+			}
+		}
+
+		document.querySelectorAll('input[name="type"]').forEach(el => el.addEventListener('change', syncType));
+		// initialize
+		syncType();
+	</script>
 </x-layouts::app>

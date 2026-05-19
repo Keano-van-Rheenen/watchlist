@@ -9,6 +9,18 @@
     letter-spacing: 0.02em;
 }
 
+.watchlist-subtitle {
+    margin-top: 0.4rem;
+    color: #52525b;
+}
+
+.watchlist-reorder-status {
+    min-height: 1.3rem;
+    margin-top: 0.3rem;
+    color: #0f766e;
+    font-size: 0.9rem;
+}
+
 .watchlist-container {
     display: grid;
     grid-template-columns: 1fr;
@@ -26,6 +38,50 @@
     background: #ffffff;
     padding: 0.85rem;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.watchable-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.watchable-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.88rem;
+}
+
+.drag-handle {
+    border: 1px dashed #94a3b8;
+    background: #f8fafc;
+    color: #0f172a;
+    border-radius: 8px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.watchable-card-ghost {
+    opacity: 0.45;
+}
+
+.watchable-card-chosen {
+    border-color: #0f766e;
+    box-shadow: 0 8px 22px rgba(15, 118, 110, 0.28);
 }
 
 .watchable-image-wrap {

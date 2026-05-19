@@ -2,7 +2,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <div class="mx-auto w-full max-w-2xl p-6">
-        <h1 class="mb-6 text-2xl font-semibold">Update Watchable</h1>
+        <h1 class="mb-6 text-2xl font-semibold">Update Movie / Series</h1>
 
         @if ($errors->any())
             <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-red-700">
@@ -19,6 +19,14 @@
             @method('PUT')
 
             <div>
+                <label class="mb-1 block text-sm font-medium">Type</label>
+                <div class="flex gap-4 items-center">
+                    <label><input type="radio" name="type" value="movie" {{ old('type', $watchable->type) === 'movie' ? 'checked' : '' }}> Movie</label>
+                    <label><input type="radio" name="type" value="series" {{ old('type', $watchable->type) === 'series' ? 'checked' : '' }}> Series</label>
+                </div>
+            </div>
+
+            <div>
                 <label for="title" class="mb-1 block text-sm font-medium">Title</label>
                 <input id="title" name="title" type="text" value="{{ old('title', $watchable->title) }}" required
                     class="w-full rounded border border-zinc-300 p-2 text-zinc-900" />
@@ -30,10 +38,16 @@
                     class="w-full rounded border border-zinc-300 p-2 text-zinc-900">{{ old('summary', $watchable->summary) }}</textarea>
             </div>
 
-            <div>
+            <div id="duration-wrap">
                 <label for="duration" class="mb-1 block text-sm font-medium">Duration</label>
                 <input id="duration" name="duration" type="text"
-                    value="{{ old('duration', substr($watchable->duration, 0, 8)) }}" placeholder="01:30" required
+                    value="{{ old('duration', optional($watchable)->duration) }}" placeholder="01:30"
+                    class="w-full rounded border border-zinc-300 p-2 text-zinc-900" />
+            </div>
+
+            <div id="episodes-wrap" style="display: none;">
+                <label for="episodes" class="mb-1 block text-sm font-medium">Episodes</label>
+                <input id="episodes" name="episodes" type="number" value="{{ old('episodes', $watchable->episodes) }}" min="1"
                     class="w-full rounded border border-zinc-300 p-2 text-zinc-900" />
             </div>
 
@@ -48,4 +62,27 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function syncTypeEdit() {
+            const type = document.querySelector('input[name="type"]:checked').value;
+            const durationWrap = document.getElementById('duration-wrap');
+            const episodesWrap = document.getElementById('episodes-wrap');
+
+            if (type === 'movie') {
+                durationWrap.style.display = '';
+                episodesWrap.style.display = 'none';
+                document.getElementById('duration').required = true;
+                document.getElementById('episodes').required = false;
+            } else {
+                durationWrap.style.display = 'none';
+                episodesWrap.style.display = '';
+                document.getElementById('duration').required = false;
+                document.getElementById('episodes').required = true;
+            }
+        }
+
+        document.querySelectorAll('input[name="type"]').forEach(el => el.addEventListener('change', syncTypeEdit));
+        syncTypeEdit();
+    </script>
 </x-layouts::app>
