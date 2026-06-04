@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\ManagesWatchables;
 use App\Http\Requests\MovieStoreRequest;
 use App\Http\Requests\MovieUpdateRequest;
 use App\Models\Movie;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class MovieController extends Controller
 {
+    use ManagesWatchables;
+
     private function authorizeOwner(Movie $movie): void
     {
         abort_unless((int) $movie->user_id === (int) Auth::id(), 403);
@@ -29,7 +32,7 @@ class MovieController extends Controller
     public function store(MovieStoreRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $nextHierarchyIndex = (Movie::where('user_id', Auth::id())->max('hierarchy_index') ?? 0) + 1;
+        $nextHierarchyIndex = $this->getNextHierarchyIndexForUser((int) Auth::id(), false);
 
         $payload = [
             'user_id' => Auth::id(),
@@ -37,6 +40,7 @@ class MovieController extends Controller
             'title' => $validated['title'],
             'summary' => $validated['summary'],
             'duration' => $validated['duration'] ?? null,
+            'seen' => false,
         ];
 
         if ($request->hasFile('picture')) {
@@ -93,26 +97,27 @@ class MovieController extends Controller
     public function destroy(Movie $movie): RedirectResponse
     {
         $this->authorizeOwner($movie);
+        $wasSeen = (bool) $movie->seen;
 
         $movie->delete();
 
-        $this->resequenceHierarchyForUser((int) Auth::id());
+        if (! $wasSeen) {
+            $this->resequenceHierarchyForUser((int) Auth::id(), false);
+        }
 
-        return redirect()
-            ->route('watchlist.index')
-            ->with('status', 'Movie deleted successfully.');
+        return redirect()->back()->with('status', 'Movie deleted successfully.');
     }
 
-    private function resequenceHierarchyForUser(int $userId): void
+    /**
+     * Mark the specified movie as seen.
+     */
+    public function seen(Movie $movie): RedirectResponse
     {
-        $allMovies = Movie::where('user_id', $userId)
-            ->orderBy('hierarchy_index')
-            ->orderBy('updated_at', 'desc')
-            ->orderBy('id')
-            ->get(['id']);
+        $this->authorizeOwner($movie);
 
-        foreach ($allMovies as $index => $movie) {
-            Movie::where('id', $movie->id)->update(['hierarchy_index' => $index + 1]);
-        }
+        $movie->update(['seen' => true]);
+        $this->resequenceHierarchyForUser((int) Auth::id(), false);
+
+        return redirect()->back()->with('status', 'Movie moved to Seen.');
     }
 }

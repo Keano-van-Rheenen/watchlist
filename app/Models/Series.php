@@ -19,11 +19,13 @@ class Series extends Model
         'summary',
         'episodes',
         'picture',
+        'seen',
     ];
 
     protected $casts = [
         'hierarchy_index' => 'integer',
         'episodes' => 'integer',
+        'seen' => 'boolean',
     ];
 
     use HasFactory;

@@ -29,6 +29,7 @@ class MovieFactory extends Factory
             'summary' => fake()->paragraph(),
             'duration' => fake()->time(),
             'picture' => UploadedFile::fake()->image('picture.jpg')->getContent(),
+            'seen' => false,
         ];
     }
 }

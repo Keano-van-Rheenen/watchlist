@@ -5,45 +5,86 @@ namespace App\Concerns;
 use App\Models\Movie;
 use App\Models\Series;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 trait ManagesWatchables
 {
-    private function getAllWatchablesForUser(int $userId): Collection
+    protected function applySeenFilter($query, ?bool $seen)
     {
-        $movies = Movie::where('user_id', $userId)
+        return match ($seen) {
+            true => $query->where('seen', true),
+            false => $query->where(function ($query) {
+                $query->where('seen', false)
+                    ->orWhereNull('seen');
+            }),
+            default => $query,
+        };
+    }
+
+    protected function getNextHierarchyIndexForUser(int $userId, ?bool $seen = null): int
+    {
+        $movieMax = $this->applySeenFilter(
+            Movie::query()->where('user_id', $userId),
+            $seen
+        )
+            ->max('hierarchy_index') ?? 0;
+
+        $seriesMax = $this->applySeenFilter(
+            Series::query()->where('user_id', $userId),
+            $seen
+        )
+            ->max('hierarchy_index') ?? 0;
+
+        return max($movieMax, $seriesMax) + 1;
+    }
+
+    protected function getAllWatchablesForUser(int $userId, ?bool $seen = null): Collection
+    {
+        $movies = $this->applySeenFilter(
+            Movie::query()->where('user_id', $userId),
+            $seen
+        )
             ->orderBy('hierarchy_index')
             ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(fn ($m) => [...$m->toArray(), 'type' => 'movie']);
+            ->map(fn (Movie $movie) => $this->prepareWatchable($movie, 'movie'));
 
-        $series = Series::where('user_id', $userId)
+        $series = $this->applySeenFilter(
+            Series::query()->where('user_id', $userId),
+            $seen
+        )
             ->orderBy('hierarchy_index')
             ->orderBy('updated_at', 'desc')
             ->get()
-            ->map(fn ($s) => [...$s->toArray(), 'type' => 'series']);
+            ->map(fn (Series $series) => $this->prepareWatchable($series, 'series'));
 
-        return collect(array_merge($movies->toArray(), $series->toArray()))
+        return $movies->merge($series)
             ->sortBy('hierarchy_index')
-            ->sortByDesc('updated_at')
             ->values();
     }
 
-    private function resequenceHierarchyForUser(int $userId): void
+    protected function resequenceHierarchyForUser(int $userId, ?bool $seen = null): void
     {
-        $movies = Movie::where('user_id', $userId)
+        $movies = $this->applySeenFilter(
+            Movie::query()->where('user_id', $userId),
+            $seen
+        )
             ->orderBy('hierarchy_index')
             ->orderBy('updated_at', 'desc')
             ->orderBy('id')
             ->get(['id']);
 
-        $series = Series::where('user_id', $userId)
+        $series = $this->applySeenFilter(
+            Series::query()->where('user_id', $userId),
+            $seen
+        )
             ->orderBy('hierarchy_index')
             ->orderBy('updated_at', 'desc')
             ->orderBy('id')
             ->get(['id']);
 
         $allWatchables = $movies->merge($series)
-            ->sortBy('updated_at', descending: true)
+            ->sortBy('hierarchy_index')
             ->values();
 
         foreach ($allWatchables as $index => $watchable) {
@@ -54,8 +95,21 @@ trait ManagesWatchables
         }
     }
 
-    private function findWatchable(string $id)
+    protected function prepareWatchable(Model $watchable, string $type): Model
     {
-        return Movie::find($id) ?? Series::find($id);
+        $watchable->type = $type;
+        $watchable->picture_src = null;
+
+        if (! empty($watchable->picture)) {
+            $mimeType = (new \finfo(FILEINFO_MIME_TYPE))->buffer($watchable->picture) ?: 'image/jpeg';
+
+            if (! str_starts_with($mimeType, 'image/')) {
+                $mimeType = 'image/jpeg';
+            }
+
+            $watchable->picture_src = 'data:' . $mimeType . ';base64,' . base64_encode($watchable->picture);
+        }
+
+        return $watchable;
     }
 }

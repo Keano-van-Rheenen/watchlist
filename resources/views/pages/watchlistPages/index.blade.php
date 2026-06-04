@@ -1,4 +1,4 @@
-<x-layouts::app :title="__('Index')">
+<x-layouts::app :title="__('WatchList')">
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/index.css'])
 
 
@@ -57,25 +57,24 @@
                         <button type="button" class="btn btn-summary"
                             onclick="document.getElementById('summary-{{ $watchable->id }}').showModal()">Summary</button>
 
-                        @if ($watchable->type === 'movie')
-                            <a href="{{ route('movies.edit', $watchable->id) }}" class="btn btn-update">Update</a>
+                        @php
+                            $type = $watchable->type === 'movie' ? "movies" : "series";
+                        @endphp
 
-                            <form method="POST" action="{{ route('movies.destroy', $watchable->id) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-delete"
-                                    onclick="return confirm('Delete this watchable?')">Delete</button>
-                            </form>
-                        @else
-                            <a href="{{ route('series.edit', $watchable->id) }}" class="btn btn-update">Update</a>
+                        <a href="{{ route("$type.edit", $watchable->id) }}" class="btn btn-update">Update</a>
 
-                            <form method="POST" action="{{ route('series.destroy', $watchable->id) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-delete"
-                                    onclick="return confirm('Delete this watchable?')">Delete</button>
-                            </form>
-                        @endif
+                        <form method="POST" action="{{ route("$type.seen", $watchable->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-update">Seen</button>
+                        </form>
+
+                        <form method="POST" action="{{ route("$type.destroy", $watchable->id) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-delete"
+                                onclick="return confirm('Delete this watchable?')">Delete</button>
+                        </form>
                     </div>
 
                     <div class="watchable-meta">

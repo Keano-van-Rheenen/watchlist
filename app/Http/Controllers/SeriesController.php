@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\ManagesWatchables;
 use App\Http\Requests\SeriesStoreRequest;
 use App\Http\Requests\SeriesUpdateRequest;
 use App\Models\Series;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class SeriesController extends Controller
 {
+    use ManagesWatchables;
+
     private function authorizeOwner(Series $series): void
     {
         abort_unless((int) $series->user_id === (int) Auth::id(), 403);
@@ -29,7 +32,7 @@ class SeriesController extends Controller
     public function store(SeriesStoreRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $nextHierarchyIndex = (Series::where('user_id', Auth::id())->max('hierarchy_index') ?? 0) + 1;
+        $nextHierarchyIndex = $this->getNextHierarchyIndexForUser((int) Auth::id(), false);
 
         $payload = [
             'user_id' => Auth::id(),
@@ -37,6 +40,7 @@ class SeriesController extends Controller
             'title' => $validated['title'],
             'summary' => $validated['summary'],
             'episodes' => $validated['episodes'] ?? null,
+            'seen' => false,
         ];
 
         if ($request->hasFile('picture')) {
@@ -93,26 +97,27 @@ class SeriesController extends Controller
     public function destroy(Series $series): RedirectResponse
     {
         $this->authorizeOwner($series);
+        $wasSeen = (bool) $series->seen;
 
         $series->delete();
 
-        $this->resequenceHierarchyForUser((int) Auth::id());
+        if (! $wasSeen) {
+            $this->resequenceHierarchyForUser((int) Auth::id(), false);
+        }
 
-        return redirect()
-            ->route('watchlist.index')
-            ->with('status', 'Series deleted successfully.');
+        return redirect()->back()->with('status', 'Series deleted successfully.');
     }
 
-    private function resequenceHierarchyForUser(int $userId): void
+    /**
+     * Mark the specified series as seen.
+     */
+    public function seen(Series $series): RedirectResponse
     {
-        $allSeries = Series::where('user_id', $userId)
-            ->orderBy('hierarchy_index')
-            ->orderBy('updated_at', 'desc')
-            ->orderBy('id')
-            ->get(['id']);
+        $this->authorizeOwner($series);
 
-        foreach ($allSeries as $index => $series) {
-            Series::where('id', $series->id)->update(['hierarchy_index' => $index + 1]);
-        }
+        $series->update(['seen' => true]);
+        $this->resequenceHierarchyForUser((int) Auth::id(), false);
+
+        return redirect()->back()->with('status', 'Series moved to Seen.');
     }
 }

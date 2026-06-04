@@ -19,10 +19,12 @@ class Movie extends Model
         'summary',
         'duration',
         'picture',
+        'seen',
     ];
 
     protected $casts = [
         'hierarchy_index' => 'integer',
+        'seen' => 'boolean',
     ];
 
     use HasFactory;

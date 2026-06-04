@@ -29,6 +29,7 @@ class SeriesFactory extends Factory
             'summary' => fake()->paragraph(),
             'episodes' => fake()->numberBetween(1, 12),
             'picture' => UploadedFile::fake()->image('picture.jpg')->getContent(),
+            'seen' => false,
         ];
     }
 }

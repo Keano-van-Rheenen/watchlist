@@ -177,6 +177,46 @@
     text-align: center;
 }
 
+.seen-watchlist-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.9rem;
+    align-items: start;
+}
+
+.seen-watchable-card {
+    width: 100%;
+    max-width: none;
+    padding: 0.7rem;
+    gap: 0.55rem;
+}
+
+.seen-watchable-card .watchable-image-wrap {
+    height: 170px;
+}
+
+.seen-watchable-card .watchable-content {
+    gap: 0.5rem;
+}
+
+.seen-watchable-card .watchable-actions {
+    gap: 0.35rem;
+}
+
+.seen-watchable-card .btn {
+    min-width: 76px;
+    padding: 0.35rem 0.58rem;
+    font-size: 0.8rem;
+}
+
+.seen-watchable-card .watchable-content h2 {
+    font-size: 1.03rem;
+}
+
+.seen-watchable-card .watchable-content small {
+    font-size: 0.74rem;
+}
+
 .summary-dialog {
     border: 0;
     border-radius: 14px;

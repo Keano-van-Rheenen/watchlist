@@ -16,9 +16,13 @@
 
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Platform')" class="grid">
-                <flux:sidebar.item icon="home" :href="route('index')" :current="request()->routeIs('index')"
+                <flux:sidebar.item icon="home" :href="route('watchlist.index')" :current="request()->routeIs('watchlist.index', 'index')"
                     wire:navigate>
                     {{ __('WatchList') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="check" :href="route('seen.index')" :current="request()->routeIs('seen.index')"
+                    wire:navigate>
+                    {{ __('Seen') }}
                 </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
