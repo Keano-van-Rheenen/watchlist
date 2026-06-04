@@ -28,6 +28,15 @@
         </flux:sidebar.nav>
 
         <flux:sidebar.nav>
+            <flux:sidebar.group :heading="__('Community')" class="grid">
+                <flux:sidebar.item icon="users" :href="route('community.index')" :current="request()->routeIs('community.index')"
+                    wire:navigate>
+                    {{ __('Discover') }}
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+        </flux:sidebar.nav>
+
+        <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Functions')" class="grid">
                 <flux:sidebar.item icon="plus" :href="route('movies.create')" :current="request()->routeIs('movies.create')"
                     wire:navigate>

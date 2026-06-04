@@ -29,6 +29,13 @@
                         @if ($watchable->type === 'movie')
                             <a href="{{ route('movies.edit', $watchable->id) }}" class="btn btn-update">Update</a>
 
+                            <form method="POST" action="{{ route('community.upload') }}">
+                                @csrf
+                                <input type="hidden" name="watchable_type" value="movie">
+                                <input type="hidden" name="watchable_id" value="{{ $watchable->id }}">
+                                <button type="submit" class="btn btn-upload">Upload</button>
+                            </form>
+
                             <form method="POST" action="{{ route('movies.destroy', $watchable->id) }}">
                                 @csrf
                                 @method('DELETE')
@@ -37,6 +44,13 @@
                             </form>
                         @else
                             <a href="{{ route('series.edit', $watchable->id) }}" class="btn btn-update">Update</a>
+
+                            <form method="POST" action="{{ route('community.upload') }}">
+                                @csrf
+                                <input type="hidden" name="watchable_type" value="series">
+                                <input type="hidden" name="watchable_id" value="{{ $watchable->id }}">
+                                <button type="submit" class="btn btn-upload">Upload</button>
+                            </form>
 
                             <form method="POST" action="{{ route('series.destroy', $watchable->id) }}">
                                 @csrf
