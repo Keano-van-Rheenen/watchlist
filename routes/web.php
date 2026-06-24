@@ -28,7 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/community/{communityWatchable}', [CommunityController::class, 'destroy'])
         ->name('community.destroy');
 
-    // Seen index and mark-as-seen actions
+    // Seen index and mark as seen
     Route::get('/seen', [App\Http\Controllers\SeenController::class, 'index'])
         ->name('seen.index');
     Route::patch('/movies/{movie}/seen', [App\Http\Controllers\MovieController::class, 'seen'])
